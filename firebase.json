@@ -1,0 +1,14 @@
+{
+  "functions": {
+    "source": ".",
+    "ignore": [
+      "**/.git/**",
+      "**/.github/**",
+      "**/node_modules/**",
+      "**/**.ts",
+      ".gitignore",
+      "firebase.json",
+      "tsconfig.json"
+    ]
+  }
+}
