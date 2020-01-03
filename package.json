@@ -1,0 +1,19 @@
+{
+  "name": "clavision-functions",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/narumincho/clavision-functions.git"
+  },
+  "author": "narumincho <narumincho.starfy@gmail.com> (https://narumincho.com)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/narumincho/clavision-functions/issues"
+  },
+  "homepage": "https://github.com/narumincho/clavision-functions#readme",
+  "devDependencies": {
+    "typescript": "^3.7.4"
+  }
+}
