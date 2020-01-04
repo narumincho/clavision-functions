@@ -307,13 +307,69 @@ export const getReadableStream = (fileHash: FileHash): stream.Readable => {
   return storageDefaultBucket.file(fileHash).createReadStream();
 };
 
+/*
+ *
+ */
 const locationList = {
-  "2603": {
-    key: createRandomId() as locationId,
-    buildingNumber: "building2",
-    floorNumber: 6,
-    points: [582, 433, 225, 350]
-  }
+  "2603": { key: createRandomId() as locationId },
+  "2601": { key: createRandomId() as locationId },
+  "2605": { key: createRandomId() as locationId },
+  "21001": { key: createRandomId() as locationId },
+  "2701": { key: createRandomId() as locationId },
+  丹羽ホール: { key: createRandomId() as locationId },
+  "2703": { key: createRandomId() as locationId },
+  "1225": { key: createRandomId() as locationId },
+  "2802A": { key: createRandomId() as locationId },
+  "2502": { key: createRandomId() as locationId },
+  FI科演習室: { key: createRandomId() as locationId },
+  "5503A": { key: createRandomId() as locationId },
+  "5503B": { key: createRandomId() as locationId },
+  "2801": { key: createRandomId() as locationId },
+  "2704": { key: createRandomId() as locationId },
+  体育館: { key: createRandomId() as locationId },
+  "2804": { key: createRandomId() as locationId },
+  "2501": { key: createRandomId() as locationId },
+  "2503": { key: createRandomId() as locationId },
+  "2505": { key: createRandomId() as locationId },
+  "5304": { key: createRandomId() as locationId },
+  "4203": { key: createRandomId() as locationId },
+  "2903": { key: createRandomId() as locationId },
+  "2805": { key: createRandomId() as locationId },
+  "5302": { key: createRandomId() as locationId },
+  "2702": { key: createRandomId() as locationId },
+  "5303": { key: createRandomId() as locationId },
+  "2901": { key: createRandomId() as locationId },
+  "21003": { key: createRandomId() as locationId },
+  "21004": { key: createRandomId() as locationId },
+  "2705": { key: createRandomId() as locationId },
+  "2803": { key: createRandomId() as locationId },
+  "1413": { key: createRandomId() as locationId },
+  "1412": { key: createRandomId() as locationId },
+  "2602": { key: createRandomId() as locationId },
+  "2604": { key: createRandomId() as locationId },
+  "5501": { key: createRandomId() as locationId },
+  "5401": { key: createRandomId() as locationId },
+  "5403": { key: createRandomId() as locationId },
+  "2504": { key: createRandomId() as locationId },
+  "2802B": { key: createRandomId() as locationId },
+  "2401": { key: createRandomId() as locationId },
+  "2904": { key: createRandomId() as locationId },
+  "2905": { key: createRandomId() as locationId },
+  "2408": { key: createRandomId() as locationId },
+  "21005": { key: createRandomId() as locationId },
+  "4205": { key: createRandomId() as locationId },
+  "4209": { key: createRandomId() as locationId },
+  "4707": { key: createRandomId() as locationId },
+  "1227": { key: createRandomId() as locationId },
+  "11310": { key: createRandomId() as locationId },
+  "1909": { key: createRandomId() as locationId },
+  "2407": { key: createRandomId() as locationId },
+  "1411": { key: createRandomId() as locationId },
+  "4304": { key: createRandomId() as locationId },
+  "2403": { key: createRandomId() as locationId },
+  "4901A": { key: createRandomId() as locationId }
+  "4302": { key: createRandomId() as locationId },
+  "2404":{ key: createRandomId() as locationId },
 } as const;
 
 const classDataList: Array<ClassData> = [
@@ -530,25 +586,25 @@ const classDataList: Array<ClassData> = [
   {
     name: "メディア演習Ａ（動画）（後前期）",
     teacher: "髙橋 時市郎",
-    location: locationList["ＦＩ科演習室"].key,
+    location: locationList["FI科演習室"].key,
     weekAndTime: { time: "class3", week: "monday" }
   },
   {
     name: "メディア演習Ａ（動画）（後後期）",
     teacher: "髙橋 時市郎",
-    location: locationList["ＦＩ科演習室"].key,
+    location: locationList["FI科演習室"].key,
     weekAndTime: { time: "class3", week: "monday" }
   },
   {
     name: "メディア演習Ｂ（音楽）（後前期）",
     teacher: "小坂 直敏",
-    location: locationList["ＦＩ科演習室"].key,
+    location: locationList["FI科演習室"].key,
     weekAndTime: { time: "class3", week: "monday" }
   },
   {
     name: "メディア演習Ｂ（音楽）（後後期）",
     teacher: "小坂 直敏",
-    location: locationList["ＦＩ科演習室"].key,
+    location: locationList["FI科演習室"].key,
     weekAndTime: { time: "class3", week: "monday" }
   },
   {
@@ -620,25 +676,25 @@ const classDataList: Array<ClassData> = [
   {
     name: "メディア演習Ａ（動画）（後前期）",
     teacher: "髙橋 時市郎",
-    location: locationList["ＦＩ科演習室"].key,
+    location: locationList["FI科演習室"].key,
     weekAndTime: { time: "class4", week: "monday" }
   },
   {
     name: "メディア演習Ａ（動画）（後後期）",
     teacher: "髙橋 時市郎",
-    location: locationList["ＦＩ科演習室"].key,
+    location: locationList["FI科演習室"].key,
     weekAndTime: { time: "class4", week: "monday" }
   },
   {
     name: "メディア演習Ｂ（音楽）（後前期）",
     teacher: "小坂 直敏",
-    location: locationList["ＦＩ科演習室"].key,
+    location: locationList["FI科演習室"].key,
     weekAndTime: { time: "class4", week: "monday" }
   },
   {
     name: "メディア演習Ｂ（音楽）（後後期）",
     teacher: "小坂 直敏",
-    location: locationList["ＦＩ科演習室"].key,
+    location: locationList["FI科演習室"].key,
     weekAndTime: { time: "class4", week: "monday" }
   },
   {
@@ -722,7 +778,7 @@ const classDataList: Array<ClassData> = [
   {
     name: "複素解析学Ⅱ",
     teacher: "梶ヶ谷 徹",
-    location: locationList["2802Ａ"].key,
+    location: locationList["2802A"].key,
     weekAndTime: { time: "class5", week: "monday" }
   },
   {
@@ -836,7 +892,7 @@ const classDataList: Array<ClassData> = [
   {
     name: "サーバプログラミング演習",
     teacher: "廣田 悠輔",
-    location: locationList["ＦＩ科演習室"].key,
+    location: locationList["FI科演習室"].key,
     weekAndTime: { time: "class3", week: "tuesday" }
   },
   {
@@ -896,7 +952,7 @@ const classDataList: Array<ClassData> = [
   {
     name: "サーバプログラミング演習",
     teacher: "廣田 悠輔",
-    location: locationList["ＦＩ科演習室"].key,
+    location: locationList["FI科演習室"].key,
     weekAndTime: { time: "class4", week: "tuesday" }
   },
   {
@@ -944,7 +1000,7 @@ const classDataList: Array<ClassData> = [
   {
     name: "微分積分学および演習Ⅱ",
     teacher: "見正 秀彦",
-    location: locationList["5503Ｂ"].key,
+    location: locationList["5503B"].key,
     weekAndTime: { time: "class4", week: "tuesday" }
   },
   {
@@ -2126,7 +2182,7 @@ const classDataList: Array<ClassData> = [
   {
     name: "工業技術概論",
     teacher: "豊田 善敬",
-    location: locationList["5503Ａ"].key,
+    location: locationList["5503A"].key,
     weekAndTime: { time: "class3", week: "saturday" }
   }
 ];
