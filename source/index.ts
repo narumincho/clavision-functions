@@ -152,24 +152,26 @@ export const lineLoginCallback = functions
  *      https://asia-northeast1-clavision.cloudfunctions.net/file
  * =====================================================================
  */
-export const file = functions.https.onRequest(async (request, response) => {
-  response.setHeader(
-    "access-control-allow-origin",
-    data.appHttpsSchemeAndHostName
-  );
-  response.setHeader("vary", "Origin");
-  if (request.method === "OPTIONS") {
-    response.setHeader("access-control-allow-methods", "POST, GET, OPTIONS");
-    response.setHeader("access-control-allow-headers", "content-type");
-    response.status(200).send("");
-    return;
-  }
-  if (request.method === "GET") {
-    response.setHeader("cache-control", "public, max-age=31536000");
-    database
-      .getReadableStream(schema.parseFileHash(request.path.slice(1)))
-      .pipe(response);
-    return;
-  }
-  response.status(400).send("invalid file parameter");
-});
+export const file = functions
+  .region("asia-northeast1")
+  .https.onRequest(async (request, response) => {
+    response.setHeader(
+      "access-control-allow-origin",
+      data.appHttpsSchemeAndHostName
+    );
+    response.setHeader("vary", "Origin");
+    if (request.method === "OPTIONS") {
+      response.setHeader("access-control-allow-methods", "POST, GET, OPTIONS");
+      response.setHeader("access-control-allow-headers", "content-type");
+      response.status(200).send("");
+      return;
+    }
+    if (request.method === "GET") {
+      response.setHeader("cache-control", "public, max-age=31536000");
+      database
+        .getReadableStream(schema.parseFileHash(request.path.slice(1)))
+        .pipe(response);
+      return;
+    }
+    response.status(400).send("invalid file parameter");
+  });
