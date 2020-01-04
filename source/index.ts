@@ -18,7 +18,7 @@ export const api = functions
   .https.onRequest((request, response) => {
     response.setHeader(
       "access-control-allow-origin",
-      "https://clavision.web.app/"
+      data.appHttpsSchemeAndHostName
     );
     response.setHeader("vary", "Origin");
     if (request.method === "OPTIONS") {
