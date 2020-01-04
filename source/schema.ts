@@ -150,6 +150,36 @@ const getLineLoginUrl = makeQueryOrMutationField<{}, URL>({
     "新規登録かログインするためのURLを得る。受け取ったURLをlocation.hrefに代入するとかして、各サービスの認証画面へ"
 });
 
+const setRoomData = async (
+  source: Return<database.RoomData & { id: database.RoomId }>
+): Promise<database.RoomData> => {
+  const data = await database.getRoomData(source.id);
+  source.name = data.name;
+  return data;
+};
+
+const roomGraphQL = new g.GraphQLObjectType({
+  name: "Room",
+  fields: makeObjectFieldMap<database.RoomData & { id: database.RoomId }>({
+    id: {
+      type: g.GraphQLNonNull(g.GraphQLString),
+      description: "教室を識別するためのID"
+    },
+    name: makeObjectField({
+      type: g.GraphQLNonNull(g.GraphQLString),
+      args: {},
+      resolve: async (source, args): Promise<string> => {
+        if (source.name === undefined) {
+          return (await setRoomData(source)).name;
+        }
+        return source.name;
+      },
+      description: "教室の名前"
+    })
+  }),
+  description: "教室のデータ"
+});
+
 export const schema = new g.GraphQLSchema({
   query: new g.GraphQLObjectType({
     name: "Query",
@@ -162,6 +192,14 @@ export const schema = new g.GraphQLSchema({
         description: "clavisionにあいさつをする",
         resolve: async () => {
           return "やあ、clavisionのAPIサーバーだよ";
+        }
+      }),
+      roomAll: makeQueryOrMutationField<{}, Array<database.RoomData>>({
+        type: graphQLNonNullList(roomGraphQL),
+        args: {},
+        description: "すべての教室のデータ",
+        resolve: async () => {
+          return await database.getAllRoomData();
         }
       })
     }

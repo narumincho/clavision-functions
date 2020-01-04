@@ -190,6 +190,35 @@ export const hashAccessToken = (accessToken: AccessToken): AccessTokenHash =>
     .digest("hex") as AccessTokenHash;
 
 /**
+ * 教室の情報を取得する
+ */
+export const getRoomData = async (id: RoomId): Promise<RoomData> => {
+  const data = (
+    await database
+      .collection("room")
+      .doc(id)
+      .get()
+  ).data();
+  if (data === undefined) {
+    throw new Error(`roomId ${id} dose not exists`);
+  }
+  return data;
+};
+
+/**
+ * すべての教室の情報を取得する
+ */
+export const getAllRoomData = async (): Promise<Array<
+  { id: RoomId } & RoomData
+>> => {
+  const dataList = await database.collection("room").get();
+  return dataList.docs.map(doc => ({
+    id: doc.id as RoomId,
+    name: doc.data().name
+  }));
+};
+
+/**
  * Firebase Cloud Storage にファイルを保存する
  * @returns ハッシュ値
  */
