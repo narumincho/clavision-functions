@@ -175,3 +175,10 @@ export const file = functions
     }
     response.status(400).send("invalid file parameter");
   });
+
+export const setClassAndLocationData = functions
+  .region("asia-northeast1")
+  .https.onRequest(async (request, response) => {
+    await database.setClassAndLocationData();
+    response.send("ok");
+  });
