@@ -139,6 +139,13 @@ export const checkExistsAndDeleteState = async (
   return false;
 };
 
+export type UserOutType = Pick<
+  UserData,
+  "classInTimeTable" | "imageFileHash" | "name"
+> & {
+  id: UserId;
+};
+
 export const getUser = async (
   id: UserId
 ): Promise<{
@@ -161,6 +168,7 @@ export const getUser = async (
     imageFileHash: data.imageFileHash
   };
 };
+
 /**
  * LINEのUserIDからユーザーを探す
  * @param lineUserId
@@ -440,6 +448,36 @@ export const verifyAccessTokenAndGetUserData = async (
     classInTimeTable: data.classInTimeTable
   };
 };
+
+/**
+ * 時間割表の登録を上書きする
+ */
+export const setClass = async (
+  accessToken: AccessToken,
+  week: Week,
+  time: Time,
+  classId: ClassId | null
+): Promise<UserOutType> => {
+  const userData = await verifyAccessTokenAndGetUserData(accessToken);
+  await database
+    .collection("user")
+    .doc(userData.id)
+    .set(
+      { classInTimeTable: { [week]: { [time]: classId } } },
+      { merge: true }
+    );
+  return {
+    ...userData,
+    classInTimeTable: {
+      ...userData.classInTimeTable,
+      [week]: {
+        ...userData.classInTimeTable[week],
+        [time]: classId
+      }
+    }
+  };
+};
+
 /**
  * Firebase Cloud Storageからファイルを読み込むReadable Streamを取得する
  * @param fileHash ファイルハッシュ
