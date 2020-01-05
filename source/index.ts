@@ -14,7 +14,7 @@ import axios, { AxiosResponse } from "axios";
  */
 
 export const api = functions
-  .region("asia-northeast1")
+  .region("us-central1")
   .https.onRequest((request, response) => {
     response.setHeader(
       "access-control-allow-origin",
@@ -94,7 +94,7 @@ const verifyAccessTokenAndGetData = (
   });
 
 export const lineLoginCallback = functions
-  .region("asia-northeast1")
+  .region("us-central1")
   .https.onRequest(async (request, response) => {
     const query: { code: unknown; state: unknown } = request.query;
     if (typeof query.code !== "string" || typeof query.state !== "string") {
@@ -153,7 +153,7 @@ export const lineLoginCallback = functions
  * =====================================================================
  */
 export const file = functions
-  .region("asia-northeast1")
+  .region("us-central1")
   .https.onRequest(async (request, response) => {
     response.setHeader(
       "access-control-allow-origin",
