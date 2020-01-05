@@ -9,7 +9,7 @@ import axios, { AxiosResponse } from "axios";
 
 /* =====================================================================
  *                          API (GraphQL)
- *     https://asia-northeast1-clavision.cloudfunctions.net/indexHtml
+ *     https://us-central1-clavision.cloudfunctions.net/indexHtml
  * =====================================================================
  */
 
@@ -35,7 +35,7 @@ export const api = functions
 
 /* =====================================================================
  *              ソーシャルログインをしたあとのリダイレクト先
- *   https://asia-northeast1-clavision.cloudfunctions.net/lineLoginCallback
+ *   https://us-central1-clavision.cloudfunctions.net/lineLoginCallback
  * =====================================================================
  */
 const createAccessTokenUrl = (accessToken: string): URL =>
@@ -149,7 +149,7 @@ export const lineLoginCallback = functions
 
 /* =====================================================================
  *                 File バイナリファイルを欲しいときに利用する
- *      https://asia-northeast1-clavision.cloudfunctions.net/file
+ *      https://us-central1-clavision.cloudfunctions.net/file
  * =====================================================================
  */
 export const file = functions
