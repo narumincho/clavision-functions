@@ -240,11 +240,11 @@ const weekAndTimeGraphQLType = new g.GraphQLObjectType({
   description: "曜日と時限",
   fields: makeObjectFieldMap<database.WeekAndTime>({
     week: {
-      type: weekGraphQLType,
+      type: g.GraphQLNonNull(weekGraphQLType),
       description: "曜日"
     },
     time: {
-      type: timeGraphQLType,
+      type: g.GraphQLNonNull(timeGraphQLType),
       description: "時限"
     }
   })
