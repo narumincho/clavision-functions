@@ -42,10 +42,12 @@ export type UserData = {
   lineUserId: LineUserId;
   imageFileHash: FileHash;
   lastIssuedAccessTokenHash: AccessTokenHash;
-  class: {
-    [key in Week]: ClassOfDay;
-  };
+  classInTimeTable: ClassOfWeek;
   createdAt: admin.firestore.Timestamp;
+};
+
+export type ClassOfWeek = {
+  [key in Week]: ClassOfDay;
 };
 
 export type ClassOfDay = {
@@ -137,6 +139,28 @@ export const checkExistsAndDeleteState = async (
   return false;
 };
 
+export const getUser = async (
+  id: UserId
+): Promise<{
+  name: string;
+  classInTimeTable: ClassOfWeek;
+  imageFileHash: FileHash;
+}> => {
+  const data = (
+    await database
+      .collection("user")
+      .doc(id)
+      .get()
+  ).data();
+  if (data === undefined) {
+    throw new Error(`userId ${id} dose not exits`);
+  }
+  return {
+    name: data.name,
+    classInTimeTable: data.classInTimeTable,
+    imageFileHash: data.imageFileHash
+  };
+};
 /**
  * LINEのUserIDからユーザーを探す
  * @param lineUserId
@@ -324,7 +348,7 @@ export const createUser = async (
       imageFileHash: imageFileHash,
       lastIssuedAccessTokenHash: hashAccessToken(accessToken),
       lineUserId: lineUserId,
-      class: {
+      classInTimeTable: {
         monday: {
           class1: null,
           class2: null,
@@ -388,6 +412,34 @@ export const updateAccessToken = async (
   return newAccessToken;
 };
 
+export const verifyAccessTokenAndGetUserData = async (
+  accessToken: AccessToken
+): Promise<{
+  id: UserId;
+  name: string;
+  imageFileHash: FileHash;
+  classInTimeTable: ClassOfWeek;
+}> => {
+  const accessTokenHash = hashAccessToken(accessToken);
+  const document = (
+    await database
+      .collection("user")
+      .where("lastIssuedAccessTokenHash", "==", accessTokenHash)
+      .get()
+  ).docs[0];
+  if (document === undefined) {
+    throw new Error(
+      "他の端末でログインされたのでアクセストークンが無効になりました"
+    );
+  }
+  const data = document.data();
+  return {
+    id: document.id as UserId,
+    name: data.name,
+    imageFileHash: data.imageFileHash,
+    classInTimeTable: data.classInTimeTable
+  };
+};
 /**
  * Firebase Cloud Storageからファイルを読み込むReadable Streamを取得する
  * @param fileHash ファイルハッシュ

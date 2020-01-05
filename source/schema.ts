@@ -328,6 +328,125 @@ const classGraphQLObjectType = new g.GraphQLObjectType({
   description: "授業のデータ"
 });
 
+const classOfDayGraphQLType = new g.GraphQLObjectType({
+  name: "classOfDay",
+  description: "1日の授業",
+  fields: makeObjectFieldMap<database.ClassOfDay>({
+    class1: {
+      type: classGraphQLObjectType,
+      description: "1限目の授業。nullは未登録が空きコマ"
+    },
+    class2: {
+      type: classGraphQLObjectType,
+      description: "2限目の授業。nullは未登録が空きコマ"
+    },
+    class3: {
+      type: classGraphQLObjectType,
+      description: "3限目の授業。nullは未登録が空きコマ"
+    },
+    class4: {
+      type: classGraphQLObjectType,
+      description: "4限目の授業。nullは未登録が空きコマ"
+    },
+    class5: {
+      type: classGraphQLObjectType,
+      description: "5限目の授業。nullは未登録が空きコマ"
+    }
+  })
+});
+
+const classOfWeekGraphQLType = new g.GraphQLObjectType({
+  name: "ClassOfWeek",
+  description: "1週間の授業",
+  fields: makeObjectFieldMap<database.ClassOfWeek>({
+    monday: {
+      type: g.GraphQLNonNull(classOfDayGraphQLType),
+      description: "月曜日の授業"
+    },
+    tuesday: {
+      type: g.GraphQLNonNull(classOfDayGraphQLType),
+      description: "火曜日の授業"
+    },
+    wednesday: {
+      type: g.GraphQLNonNull(classOfDayGraphQLType),
+      description: "水曜日の授業"
+    },
+    thursday: {
+      type: g.GraphQLNonNull(classOfDayGraphQLType),
+      description: "木曜日の授業"
+    },
+    friday: {
+      type: g.GraphQLNonNull(classOfDayGraphQLType),
+      description: "金曜日の授業"
+    },
+    saturday: {
+      type: g.GraphQLNonNull(classOfDayGraphQLType),
+      description: "土曜日の授業"
+    }
+  })
+});
+
+type UserOutType = Pick<
+  database.UserData,
+  "classInTimeTable" | "imageFileHash" | "name"
+> & {
+  id: database.UserId;
+};
+
+const setUserData = async (
+  source: Return<UserOutType>
+): ReturnType<typeof database.getUser> => {
+  const data = await database.getUser(source.id);
+  source.name = data.name;
+  source.imageFileHash = data.imageFileHash;
+  source.classInTimeTable = data.classInTimeTable;
+  return data;
+};
+
+const userGraphQLType = new g.GraphQLObjectType({
+  name: "User",
+  description: "ユーザーのデータ",
+  fields: makeObjectFieldMap<UserOutType>({
+    id: {
+      type: g.GraphQLNonNull(g.GraphQLString),
+      description: "ユーザーを識別するためのID"
+    },
+    classInTimeTable: makeObjectField({
+      type: g.GraphQLNonNull(classOfWeekGraphQLType),
+      args: {},
+      description: "時間割表に登録した授業",
+      resolve: async source => {
+        if (source.classInTimeTable === undefined) {
+          return (await setUserData(source)).classInTimeTable;
+        }
+        return source.classInTimeTable;
+      }
+    }),
+    imageFileHash: makeObjectField({
+      type: g.GraphQLNonNull(hashGraphQLType),
+      args: {},
+      description: "ユーザーのプロフィール画像",
+      resolve: async source => {
+        if (source.imageFileHash === undefined) {
+          return (await setUserData(source)).imageFileHash;
+        }
+        return source.imageFileHash;
+      }
+    }),
+    name: makeObjectField({
+      type: g.GraphQLNonNull(g.GraphQLString),
+      args: {},
+      description: "ユーザー名 LINEから引き継ぐ",
+      resolve: async source => {
+        if (source.name === undefined) {
+          return (await setUserData(source)).name;
+        }
+        return source.name;
+      }
+    })
+  })
+});
+
 export const schema = new g.GraphQLSchema({
   query: new g.GraphQLObjectType({
     name: "Query",
@@ -340,6 +459,29 @@ export const schema = new g.GraphQLSchema({
         description: "clavisionにあいさつをする",
         resolve: async () => {
           return "やあ、clavisionのAPIサーバーだよ";
+        }
+      }),
+      user: makeQueryOrMutationField<
+        {
+          accessToken: database.AccessToken;
+        },
+        Pick<
+          database.UserData,
+          "classInTimeTable" | "imageFileHash" | "name"
+        > & {
+          id: database.UserId;
+        }
+      >({
+        type: g.GraphQLNonNull(userGraphQLType),
+        args: {
+          accessToken: {
+            type: g.GraphQLNonNull(g.GraphQLString),
+            description: "アクセストークン"
+          }
+        },
+        description: "ユーザーの情報を取得する",
+        resolve: async args => {
+          return database.verifyAccessTokenAndGetUserData(args.accessToken);
         }
       }),
       roomAll: makeQueryOrMutationField<
