@@ -44,7 +44,7 @@ export const appHostName = "clavision.web.app";
 export const appHttpsSchemeAndHostName = "https://" + appHostName;
 
 export const lineLoginRedirectUri =
-  "https://asia-northeast1-clavision.cloudfunctions.net/lineLoginCallback";
+  "https://us-central1-clavision.cloudfunctions.net/lineLoginCallback";
 
 export const lineLoginClientId = "1653666685";
 
