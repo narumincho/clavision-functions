@@ -88,7 +88,7 @@ type ReturnLoop<Type> = Type extends { id: infer idType }
   ? { id: idType } & { [k in keyof Type]?: Return<Type[k]> }
   : Type extends { hash: infer hashType }
   ? { hash: hashType } & { [k in keyof Type]?: Return<Type[k]> }
-  : { [k in keyof Type]?: Return<Type[k]> };
+  : { [k in keyof Type]: Return<Type[k]> };
 
 const makeQueryOrMutationField = <
   Args extends { [k in string]: unknown },
@@ -150,6 +150,296 @@ const getLineLoginUrl = makeQueryOrMutationField<{}, URL>({
     "新規登録かログインするためのURLを得る。受け取ったURLをlocation.hrefに代入するとかして、各サービスの認証画面へ"
 });
 
+const setRoomData = async (
+  source: Return<database.RoomData & { id: database.RoomId }>
+): Promise<database.RoomData> => {
+  const data = await database.getRoomData(source.id);
+  source.name = data.name;
+  return data;
+};
+
+const roomGraphQLObjectType = new g.GraphQLObjectType({
+  name: "Room",
+  fields: makeObjectFieldMap<database.RoomData & { id: database.RoomId }>({
+    id: {
+      type: g.GraphQLNonNull(g.GraphQLString),
+      description: "教室を識別するためのID"
+    },
+    name: makeObjectField({
+      type: g.GraphQLNonNull(g.GraphQLString),
+      args: {},
+      resolve: async (source, args): Promise<string> => {
+        if (source.name === undefined) {
+          return (await setRoomData(source)).name;
+        }
+        return source.name;
+      },
+      description: "教室の名前"
+    })
+  }),
+  description: "教室のデータ"
+});
+
+const weekGraphQlTypeValues: {
+  [key in database.Week]: { description: string };
+} = {
+  monday: {
+    description: "月曜日"
+  },
+  tuesday: {
+    description: "火曜日"
+  },
+  wednesday: {
+    description: "水曜日"
+  },
+  thursday: {
+    description: "木曜日"
+  },
+  friday: {
+    description: "金曜日"
+  },
+  saturday: {
+    description: "土曜日"
+  }
+};
+
+const weekGraphQLType = new g.GraphQLEnumType({
+  name: "Week",
+  description: "授業がある月～土までの曜日",
+  values: weekGraphQlTypeValues
+});
+
+const timeGraphQLTypeValues: {
+  [key in database.Time]: { description: string };
+} = {
+  class1: {
+    description: "1時限目"
+  },
+  class2: {
+    description: "2時限目"
+  },
+  class3: {
+    description: "3時限目"
+  },
+  class4: {
+    description: "4時限目"
+  },
+  class5: {
+    description: "5時限目"
+  }
+};
+
+const timeGraphQLType = new g.GraphQLEnumType({
+  name: "Time",
+  description: "時限",
+  values: timeGraphQLTypeValues
+});
+
+const weekAndTimeGraphQLType = new g.GraphQLObjectType({
+  name: "WeekAndTime",
+  description: "曜日と時限",
+  fields: makeObjectFieldMap<database.WeekAndTime>({
+    week: {
+      type: weekGraphQLType,
+      description: "曜日"
+    },
+    time: {
+      type: timeGraphQLType,
+      description: "時限"
+    }
+  })
+});
+
+const setClassData = async (
+  source: Return<{
+    id: database.ClassId;
+    name: string;
+    teacher: string;
+    room: { id: database.RoomId } & database.RoomData;
+    weekAndTime: database.WeekAndTime;
+  }>
+): ReturnType<typeof database.getClassData> => {
+  const data = await database.getClassData(source.id);
+  source.name = data.name;
+  source.teacher = data.teacher;
+  source.room = data.room;
+  source.weekAndTime = data.weekAndTime;
+  return data;
+};
+
+const classGraphQLObjectType = new g.GraphQLObjectType({
+  name: "Class",
+  fields: makeObjectFieldMap<{
+    id: database.ClassId;
+    name: string;
+    teacher: string;
+    room: { id: database.RoomId } & database.RoomData;
+    weekAndTime: database.WeekAndTime;
+  }>({
+    id: {
+      type: g.GraphQLNonNull(g.GraphQLString),
+      description: "授業を識別するためのID"
+    },
+    name: makeObjectField({
+      type: g.GraphQLNonNull(g.GraphQLString),
+      args: {},
+      resolve: async (source): Promise<string> => {
+        if (source.name === undefined) {
+          return (await setClassData(source)).name;
+        }
+        return source.name;
+      },
+      description: "授業名"
+    }),
+    teacher: makeObjectField({
+      type: g.GraphQLNonNull(g.GraphQLString),
+      args: {},
+      resolve: async (source): Promise<string> => {
+        if (source.teacher === undefined) {
+          return (await setClassData(source)).teacher;
+        }
+        return source.teacher;
+      },
+      description: "講師"
+    }),
+    weekAndTime: makeObjectField({
+      type: g.GraphQLNonNull(weekAndTimeGraphQLType),
+      args: {},
+      resolve: async (source): Promise<database.WeekAndTime> => {
+        if (source.weekAndTime === undefined) {
+          return (await setClassData(source)).weekAndTime;
+        }
+        return source.weekAndTime;
+      },
+      description: "曜日と時限"
+    }),
+    room: makeObjectField({
+      type: g.GraphQLNonNull(roomGraphQLObjectType),
+      args: {},
+      resolve: async (source): Promise<{ id: database.RoomId }> => {
+        if (source.room === undefined) {
+          return (await setClassData(source)).room;
+        }
+        return source.room;
+      },
+      description: "教室"
+    })
+  }),
+  description: "授業のデータ"
+});
+
+const classOfDayGraphQLType = new g.GraphQLObjectType({
+  name: "classOfDay",
+  description: "1日の授業",
+  fields: makeObjectFieldMap<database.ClassOfDay>({
+    class1: {
+      type: classGraphQLObjectType,
+      description: "1限目の授業。nullは未登録が空きコマ"
+    },
+    class2: {
+      type: classGraphQLObjectType,
+      description: "2限目の授業。nullは未登録が空きコマ"
+    },
+    class3: {
+      type: classGraphQLObjectType,
+      description: "3限目の授業。nullは未登録が空きコマ"
+    },
+    class4: {
+      type: classGraphQLObjectType,
+      description: "4限目の授業。nullは未登録が空きコマ"
+    },
+    class5: {
+      type: classGraphQLObjectType,
+      description: "5限目の授業。nullは未登録が空きコマ"
+    }
+  })
+});
+
+const classOfWeekGraphQLType = new g.GraphQLObjectType({
+  name: "ClassOfWeek",
+  description: "1週間の授業",
+  fields: makeObjectFieldMap<database.ClassOfWeek>({
+    monday: {
+      type: g.GraphQLNonNull(classOfDayGraphQLType),
+      description: "月曜日の授業"
+    },
+    tuesday: {
+      type: g.GraphQLNonNull(classOfDayGraphQLType),
+      description: "火曜日の授業"
+    },
+    wednesday: {
+      type: g.GraphQLNonNull(classOfDayGraphQLType),
+      description: "水曜日の授業"
+    },
+    thursday: {
+      type: g.GraphQLNonNull(classOfDayGraphQLType),
+      description: "木曜日の授業"
+    },
+    friday: {
+      type: g.GraphQLNonNull(classOfDayGraphQLType),
+      description: "金曜日の授業"
+    },
+    saturday: {
+      type: g.GraphQLNonNull(classOfDayGraphQLType),
+      description: "土曜日の授業"
+    }
+  })
+});
+
+const setUserData = async (
+  source: Return<database.UserOutType>
+): ReturnType<typeof database.getUser> => {
+  const data = await database.getUser(source.id);
+  source.name = data.name;
+  source.imageFileHash = data.imageFileHash;
+  source.classInTimeTable = data.classInTimeTable;
+  return data;
+};
+
+const userGraphQLType = new g.GraphQLObjectType({
+  name: "User",
+  description: "ユーザーのデータ",
+  fields: makeObjectFieldMap<database.UserOutType>({
+    id: {
+      type: g.GraphQLNonNull(g.GraphQLString),
+      description: "ユーザーを識別するためのID"
+    },
+    classInTimeTable: makeObjectField({
+      type: g.GraphQLNonNull(classOfWeekGraphQLType),
+      args: {},
+      description: "時間割表に登録した授業",
+      resolve: async source => {
+        if (source.classInTimeTable === undefined) {
+          return (await setUserData(source)).classInTimeTable;
+        }
+        return source.classInTimeTable;
+      }
+    }),
+    imageFileHash: makeObjectField({
+      type: g.GraphQLNonNull(hashGraphQLType),
+      args: {},
+      description: "ユーザーのプロフィール画像",
+      resolve: async source => {
+        if (source.imageFileHash === undefined) {
+          return (await setUserData(source)).imageFileHash;
+        }
+        return source.imageFileHash;
+      }
+    }),
+    name: makeObjectField({
+      type: g.GraphQLNonNull(g.GraphQLString),
+      args: {},
+      description: "ユーザー名 LINEから引き継ぐ",
+      resolve: async source => {
+        if (source.name === undefined) {
+          return (await setUserData(source)).name;
+        }
+        return source.name;
+      }
+    })
+  })
+});
+
 export const schema = new g.GraphQLSchema({
   query: new g.GraphQLObjectType({
     name: "Query",
@@ -163,6 +453,46 @@ export const schema = new g.GraphQLSchema({
         resolve: async () => {
           return "やあ、clavisionのAPIサーバーだよ";
         }
+      }),
+      user: makeQueryOrMutationField<
+        { accessToken: database.AccessToken },
+        database.UserOutType
+      >({
+        type: g.GraphQLNonNull(userGraphQLType),
+        args: {
+          accessToken: {
+            type: g.GraphQLNonNull(g.GraphQLString),
+            description: "アクセストークン"
+          }
+        },
+        description: "ユーザーの情報を取得する",
+        resolve: async args => {
+          return database.verifyAccessTokenAndGetUserData(args.accessToken);
+        }
+      }),
+      roomAll: makeQueryOrMutationField<
+        {},
+        Array<database.RoomData & { id: database.RoomId }>
+      >({
+        type: graphQLNonNullList(roomGraphQLObjectType),
+        args: {},
+        description: "すべての教室のデータ",
+        resolve: async () => await database.getAllRoomData()
+      }),
+      classAll: makeQueryOrMutationField<
+        {},
+        Array<{
+          id: database.ClassId;
+          name: string;
+          teacher: string;
+          room: { id: database.RoomId } & database.RoomData;
+          weekAndTime: database.WeekAndTime;
+        }>
+      >({
+        type: graphQLNonNullList(classGraphQLObjectType),
+        args: {},
+        description: "すべての授業のデータ",
+        resolve: async () => await database.getAllClassData()
       })
     }
   }),
@@ -170,7 +500,45 @@ export const schema = new g.GraphQLSchema({
     name: "Mutation",
     description: "データを作成、更新ができる",
     fields: {
-      getLineLoginUrl
+      getLineLoginUrl,
+      setClass: makeQueryOrMutationField<
+        {
+          accessToken: database.AccessToken;
+          week: database.Week;
+          time: database.Time;
+          classId: database.ClassId | null;
+        },
+        database.UserOutType
+      >({
+        type: g.GraphQLNonNull(userGraphQLType),
+        args: {
+          accessToken: {
+            type: g.GraphQLNonNull(g.GraphQLString),
+            description: "アクセストークン"
+          },
+          week: {
+            type: g.GraphQLNonNull(weekGraphQLType),
+            description: "曜日"
+          },
+          time: {
+            type: g.GraphQLNonNull(timeGraphQLType),
+            description: "時限"
+          },
+          classId: {
+            type: g.GraphQLString,
+            description: "授業ID。nullで指定なしにできる"
+          }
+        },
+        description: "時間割に授業を登録する",
+        resolve: async args => {
+          return await database.setClass(
+            args.accessToken,
+            args.week,
+            args.time,
+            args.classId
+          );
+        }
+      })
     }
   })
 });
