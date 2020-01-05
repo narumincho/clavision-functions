@@ -283,7 +283,7 @@ const classGraphQLObjectType = new g.GraphQLObjectType({
     name: makeObjectField({
       type: g.GraphQLNonNull(g.GraphQLString),
       args: {},
-      resolve: async (source, args): Promise<string> => {
+      resolve: async (source): Promise<string> => {
         if (source.name === undefined) {
           return (await setClassData(source)).name;
         }
@@ -294,7 +294,7 @@ const classGraphQLObjectType = new g.GraphQLObjectType({
     teacher: makeObjectField({
       type: g.GraphQLNonNull(g.GraphQLString),
       args: {},
-      resolve: async (source, args): Promise<string> => {
+      resolve: async (source): Promise<string> => {
         if (source.teacher === undefined) {
           return (await setClassData(source)).teacher;
         }
@@ -305,7 +305,7 @@ const classGraphQLObjectType = new g.GraphQLObjectType({
     weekAndTime: makeObjectField({
       type: g.GraphQLNonNull(weekAndTimeGraphQLType),
       args: {},
-      resolve: async (source, args): Promise<database.WeekAndTime> => {
+      resolve: async (source): Promise<database.WeekAndTime> => {
         if (source.weekAndTime === undefined) {
           return (await setClassData(source)).weekAndTime;
         }
@@ -316,7 +316,7 @@ const classGraphQLObjectType = new g.GraphQLObjectType({
     room: makeObjectField({
       type: g.GraphQLNonNull(roomGraphQLObjectType),
       args: {},
-      resolve: async (source, args): Promise<{ id: database.RoomId }> => {
+      resolve: async (source): Promise<{ id: database.RoomId }> => {
         if (source.room === undefined) {
           return (await setClassData(source)).room;
         }
