@@ -331,7 +331,7 @@ const classGraphQLObjectType = new g.GraphQLObjectType({
 const classOfDayGraphQLType = new g.GraphQLObjectType({
   name: "classOfDay",
   description: "1日の授業",
-  fields: makeObjectFieldMap<database.ClassOfDay>({
+  fields: makeObjectFieldMap<database.ClassOfDayOutType>({
     class1: {
       type: classGraphQLObjectType,
       description: "1限目の授業。nullは未登録が空きコマ"
@@ -358,7 +358,7 @@ const classOfDayGraphQLType = new g.GraphQLObjectType({
 const classOfWeekGraphQLType = new g.GraphQLObjectType({
   name: "ClassOfWeek",
   description: "1週間の授業",
-  fields: makeObjectFieldMap<database.ClassOfWeek>({
+  fields: makeObjectFieldMap<database.ClassOfWeekOutType>({
     monday: {
       type: g.GraphQLNonNull(classOfDayGraphQLType),
       description: "月曜日の授業"

@@ -54,6 +54,44 @@ export type ClassOfDay = {
   [key in Time]: ClassId | null;
 };
 
+export type ClassOfWeekOutType = {
+  [weekKey in Week]: ClassOfDayOutType;
+};
+
+export type ClassOfDayOutType = {
+  [timeKey in Time]: {
+    id: ClassId;
+  } | null;
+};
+
+const classIdMaybeToClassOutTypeMaybe = (
+  classId: null | ClassId
+): { id: ClassId } | null => {
+  if (classId === null) {
+    return null;
+  }
+  return { id: classId };
+};
+
+const classOfDayToOutType = (classOfDay: ClassOfDay): ClassOfDayOutType => ({
+  class1: classIdMaybeToClassOutTypeMaybe(classOfDay.class1),
+  class2: classIdMaybeToClassOutTypeMaybe(classOfDay.class2),
+  class3: classIdMaybeToClassOutTypeMaybe(classOfDay.class3),
+  class4: classIdMaybeToClassOutTypeMaybe(classOfDay.class4),
+  class5: classIdMaybeToClassOutTypeMaybe(classOfDay.class5)
+});
+
+const classOfWeekToOutType = (
+  classOfWeek: ClassOfWeek
+): ClassOfWeekOutType => ({
+  monday: classOfDayToOutType(classOfWeek.monday),
+  tuesday: classOfDayToOutType(classOfWeek.tuesday),
+  wednesday: classOfDayToOutType(classOfWeek.wednesday),
+  thursday: classOfDayToOutType(classOfWeek.thursday),
+  friday: classOfDayToOutType(classOfWeek.friday),
+  saturday: classOfDayToOutType(classOfWeek.saturday)
+});
+
 export type Week =
   | "monday"
   | "tuesday"
@@ -139,18 +177,16 @@ export const checkExistsAndDeleteState = async (
   return false;
 };
 
-export type UserOutType = Pick<
-  UserData,
-  "classInTimeTable" | "imageFileHash" | "name"
-> & {
+export type UserOutType = Pick<UserData, "imageFileHash" | "name"> & {
   id: UserId;
+  classInTimeTable: ClassOfWeekOutType;
 };
 
 export const getUser = async (
   id: UserId
 ): Promise<{
   name: string;
-  classInTimeTable: ClassOfWeek;
+  classInTimeTable: ClassOfWeekOutType;
   imageFileHash: FileHash;
 }> => {
   const data = (
@@ -164,7 +200,7 @@ export const getUser = async (
   }
   return {
     name: data.name,
-    classInTimeTable: data.classInTimeTable,
+    classInTimeTable: classOfWeekToOutType(data.classInTimeTable),
     imageFileHash: data.imageFileHash
   };
 };
@@ -422,12 +458,7 @@ export const updateAccessToken = async (
 
 export const verifyAccessTokenAndGetUserData = async (
   accessToken: AccessToken
-): Promise<{
-  id: UserId;
-  name: string;
-  imageFileHash: FileHash;
-  classInTimeTable: ClassOfWeek;
-}> => {
+): Promise<UserOutType> => {
   const accessTokenHash = hashAccessToken(accessToken);
   const document = (
     await database
@@ -445,7 +476,7 @@ export const verifyAccessTokenAndGetUserData = async (
     id: document.id as UserId,
     name: data.name,
     imageFileHash: data.imageFileHash,
-    classInTimeTable: data.classInTimeTable
+    classInTimeTable: classOfWeekToOutType(data.classInTimeTable)
   };
 };
 
@@ -472,7 +503,7 @@ export const setClass = async (
       ...userData.classInTimeTable,
       [week]: {
         ...userData.classInTimeTable[week],
-        [time]: classId
+        [time]: classIdMaybeToClassOutTypeMaybe(classId)
       }
     }
   };
