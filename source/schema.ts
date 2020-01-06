@@ -506,7 +506,7 @@ export const schema = new g.GraphQLSchema({
           accessToken: database.AccessToken;
           week: database.Week;
           time: database.Time;
-          classId: database.ClassId | null;
+          classId: Maybe<database.ClassId>;
         },
         database.UserOutType
       >({
@@ -535,7 +535,7 @@ export const schema = new g.GraphQLSchema({
             args.accessToken,
             args.week,
             args.time,
-            args.classId
+            args.classId ?? null
           );
         }
       })
